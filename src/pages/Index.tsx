@@ -17,6 +17,7 @@ const Index = () => {
     companyEmail: "",
     companyAddress: "",
     companyPhone: "",
+    companyLogo: "",
     clientName: "",
     clientEmail: "",
     clientAddress: "",

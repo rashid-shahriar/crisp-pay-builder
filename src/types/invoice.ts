@@ -17,6 +17,7 @@ export interface InvoiceData {
   companyEmail: string;
   companyAddress: string;
   companyPhone: string;
+  companyLogo: string;
   
   // Client details
   clientName: string;

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Download, Send, CreditCard } from "lucide-react";
 import { InvoiceData } from "@/types/invoice";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface InvoicePreviewProps {
   invoiceData: InvoiceData;
@@ -28,11 +30,44 @@ export const InvoicePreview = ({ invoiceData, onDownload, onSend, onPayment }: I
     }).format(amount);
   };
 
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('invoice-preview');
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    const imgWidth = 210;
+    const pageHeight = 295;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    
+    let position = 0;
+    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    pdf.save(`invoice-${invoiceData.invoiceNumber}.pdf`);
+  };
+
   return (
     <div className="space-y-4">
       {/* Action Buttons */}
       <div className="flex gap-2">
-        <Button onClick={onDownload} variant="outline" size="sm">
+        <Button onClick={handleDownloadPDF} variant="outline" size="sm">
           <Download className="w-4 h-4" />
           Download PDF
         </Button>
@@ -48,7 +83,7 @@ export const InvoicePreview = ({ invoiceData, onDownload, onSend, onPayment }: I
 
       {/* Invoice Preview */}
       <Card className="shadow-card">
-        <CardContent className="p-8 space-y-8">
+        <CardContent id="invoice-preview" className="p-8 space-y-8">
           {/* Header */}
           <div className="flex justify-between items-start">
             <div>
@@ -56,6 +91,16 @@ export const InvoicePreview = ({ invoiceData, onDownload, onSend, onPayment }: I
               <p className="text-muted-foreground mt-1">#{invoiceData.invoiceNumber}</p>
             </div>
             <div className="text-right">
+              {invoiceData.companyLogo && (
+                <img 
+                  src={invoiceData.companyLogo} 
+                  alt="Company Logo" 
+                  className="h-16 w-auto mb-4 ml-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
               <h2 className="text-xl font-semibold">{invoiceData.companyName}</h2>
               <div className="text-sm text-muted-foreground whitespace-pre-line mt-1">
                 {invoiceData.companyAddress}

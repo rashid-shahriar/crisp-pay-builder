@@ -145,6 +145,15 @@ export const InvoiceForm = ({ invoiceData, onInvoiceChange }: InvoiceFormProps) 
                 placeholder="(555) 123-4567"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyLogo">Company Logo URL</Label>
+              <Input
+                id="companyLogo"
+                value={invoiceData.companyLogo}
+                onChange={(e) => updateField("companyLogo", e.target.value)}
+                placeholder="https://example.com/logo.png"
+              />
+            </div>
           </div>
         </div>
 
